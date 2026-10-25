@@ -1,5 +1,8 @@
 # company-database
 
+> **Public copy of a private repository. Left out of this copy and its history: the defence-industry sample (compiled from association member lists; redistribution terms unchecked) and the Estonia e-Business Register sample (licence not confirmed). The code that builds them is included.**
+
+
 A country-wise, sector-wise company universe built from **free, open registries** (no scraping of commercial
 contact databases). 18.17M companies, 132 countries, 21 sectors (97.6% sector-coded).
 
