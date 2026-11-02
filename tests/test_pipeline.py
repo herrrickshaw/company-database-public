@@ -1,4 +1,5 @@
 """Characterisation tests: load two small sources into a temporary DuckDB, dedupe, and write lists/parquet."""
+
 from __future__ import annotations
 
 import csv
@@ -13,7 +14,12 @@ import pytest
 import build
 
 CH_HEADER = [
-    "CompanyName", "CompanyNumber", "RegAddress.PostTown", "CompanyStatus", "SICCode.SicText_1", "URI",
+    "CompanyName",
+    "CompanyNumber",
+    "RegAddress.PostTown",
+    "CompanyStatus",
+    "SICCode.SicText_1",
+    "URI",
 ]
 CH_ROWS = [
     ["ACME LTD", "00000001", "LONDON", "Active", "68100 - Buying and selling of own real estate", "http://x/1"],
@@ -66,7 +72,10 @@ def rows(con, sql):
 
 
 def test_load_ch_keeps_active_rows_and_maps_sic(loaded):
-    got = rows(loaded, "SELECT source_id, name, city, sector_code, sector, status FROM companies WHERE source='ch' ORDER BY source_id")
+    got = rows(
+        loaded,
+        "SELECT source_id, name, city, sector_code, sector, status FROM companies WHERE source='ch' ORDER BY source_id",
+    )
     assert [r[0] for r in got] == ["00000001", "00000002", "00000003", "00000004", "00000006"]
     assert got[0] == ("00000001", "ACME LTD", "LONDON", "68100", "Real estate", "Active")
     assert got[1][3:5] == ("62012", "Information & communication")
@@ -74,7 +83,9 @@ def test_load_ch_keeps_active_rows_and_maps_sic(loaded):
 
 
 def test_load_damodaran_maps_country_and_sector(loaded):
-    got = rows(loaded, "SELECT source_id, country, sector, status FROM companies WHERE source='damodaran' ORDER BY source_id")
+    got = rows(
+        loaded, "SELECT source_id, country, sector, status FROM companies WHERE source='damodaran' ORDER BY source_id"
+    )
     assert got == [
         ("LSE:ACM", "GB", "Real estate", "Listed"),
         ("LSE:GAM", "GB", "Information & communication", "Listed"),
@@ -104,7 +115,9 @@ def test_dedupe_merges_listed_into_unique_registry_row(loaded):
     assert len(got) == 8
 
 
-@pytest.mark.xfail(strict=True, reason="db() re-registers UDFs on DuckDB's cached connection; second step in one process fails")
+@pytest.mark.xfail(
+    strict=True, reason="db() re-registers UDFs on DuckDB's cached connection; second step in one process fails"
+)
 def test_lists_writes_one_csv_per_country_sector(loaded, workdir):
     build.dedupe()
     build.lists()
@@ -120,12 +133,25 @@ def test_lists_writes_one_csv_per_country_sector(loaded, workdir):
         recs = list(csv.DictReader(fh))
     assert [r["name"] for r in recs] == ["ACME LTD"]
     assert recs[0]["listed_ticker"] == "LSE:ACM"
-    assert list(recs[0]) == ["name", "sources", "source_id", "city", "website", "sector_code", "size", "status", "listed_ticker"]
+    assert list(recs[0]) == [
+        "name",
+        "sources",
+        "source_id",
+        "city",
+        "website",
+        "sector_code",
+        "size",
+        "status",
+        "listed_ticker",
+    ]
 
 
 def test_export_partitions_parquet(loaded, workdir):
     build.export()
-    parts = sorted(p.parent.relative_to(workdir / "by_sector_country").as_posix() for p in (workdir / "by_sector_country").rglob("*.parquet"))
+    parts = sorted(
+        p.parent.relative_to(workdir / "by_sector_country").as_posix()
+        for p in (workdir / "by_sector_country").rglob("*.parquet")
+    )
     assert parts == [
         "country=GB/sector=Information%20%26%20communication",
         "country=GB/sector=Manufacturing",

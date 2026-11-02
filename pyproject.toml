@@ -1,0 +1,22 @@
+[project]
+name = "company-database"
+version = "0.1.0"
+description = "Country-wise, sector-wise company universe built from free, open registries into DuckDB"
+requires-python = ">=3.9"
+dependencies = ["duckdb>=1.1", "pandas", "pyarrow"]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py39"
+extend-exclude = [".venv", "raw", "lists", "by_sector_country"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+# E501: the DAMO / ISO lookup tables and the SQL strings are deliberately dense.
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

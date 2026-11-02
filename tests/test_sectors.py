@@ -1,4 +1,5 @@
 """Unit tests for the pure sector-mapping helpers and lookup tables."""
+
 from __future__ import annotations
 
 import pytest

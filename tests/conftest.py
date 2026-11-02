@@ -1,4 +1,5 @@
 """Shared fixtures: a throw-away build directory so tests never touch the real DuckDB file."""
+
 from __future__ import annotations
 
 import sys
