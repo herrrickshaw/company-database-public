@@ -115,9 +115,6 @@ def test_dedupe_merges_listed_into_unique_registry_row(loaded):
     assert len(got) == 8
 
 
-@pytest.mark.xfail(
-    strict=True, reason="db() re-registers UDFs on DuckDB's cached connection; second step in one process fails"
-)
 def test_lists_writes_one_csv_per_country_sector(loaded, workdir):
     build.dedupe()
     build.lists()
@@ -157,6 +154,12 @@ def test_export_partitions_parquet(loaded, workdir):
         "country=GB/sector=Manufacturing",
         "country=GB/sector=Real%20estate",
     ]
+
+
+def test_db_can_be_opened_twice_in_one_process(workdir):
+    build.db()
+    c = build.db()
+    assert c.execute("SELECT sic_sector('10')").fetchone()[0] == "Manufacturing"
 
 
 def test_cli_without_arguments_fails_nonzero():

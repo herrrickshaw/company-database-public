@@ -377,8 +377,18 @@ COLUMNS = (
 def db(path: pathlib.Path | None = None) -> duckdb.DuckDBPyConnection:
     """Open (creating if needed) the DuckDB file, register the sector UDFs and ensure ``companies`` exists."""
     c = duckdb.connect(str(path or DB))
-    c.create_function("nic_sector", nic_sector, ["INTEGER"], VARCHAR, null_handling="special")
-    c.create_function("sic_sector", sic_sector, [VARCHAR], VARCHAR, null_handling="special")
+    # duckdb.connect() returns a cached connection for a path already open in this process, on which the
+    # UDFs are already registered; re-registering raises CatalogException.
+    registered = {
+        r[0]
+        for r in c.execute(
+            "SELECT function_name FROM duckdb_functions() WHERE function_name IN ('nic_sector','sic_sector')"
+        ).fetchall()
+    }
+    if "nic_sector" not in registered:
+        c.create_function("nic_sector", nic_sector, ["INTEGER"], VARCHAR, null_handling="special")
+    if "sic_sector" not in registered:
+        c.create_function("sic_sector", sic_sector, [VARCHAR], VARCHAR, null_handling="special")
     c.execute(
         """CREATE TABLE IF NOT EXISTS companies(source VARCHAR, source_id VARCHAR, name VARCHAR, country VARCHAR,
         city VARCHAR, website VARCHAR, sector_scheme VARCHAR, sector_code VARCHAR, sector VARCHAR, size VARCHAR, status VARCHAR)"""
