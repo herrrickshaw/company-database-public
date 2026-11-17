@@ -2,6 +2,14 @@
 
 Guidance for Claude Code sessions working in this repository.
 
+## Working here
+- Everything is in `build.py` (CLI: `fetch`, `load <source> <file>`, `dedupe`, `lists`, `export`) and `fetch_fi.py`.
+  Sources are registered in `LOADERS` / `FETCHERS`; add a source by adding a `load_<name>(con, path)` function.
+- Verify with `ruff check . && pytest -q` (fixtures build a temp DuckDB; no network). CI runs the same.
+- `raw/`, `lists/`, `by_sector_country/` and `*.duckdb` are generated and gitignored; `samples/` and `docs/` are
+  tracked data — do not regenerate or edit them by hand.
+- This is a PUBLIC copy: never add the defence or Estonia samples, credentials, or private derived inputs.
+
 <!-- source-fetch-toolkit:v1 (managed by ~/bin/add_source_fetch_section.py — edit there, not here) -->
 ## Source fetching for data collection & literature surveys
 
