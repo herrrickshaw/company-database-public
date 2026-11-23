@@ -126,3 +126,9 @@ def test_main_prints_progress_every_500_pages(tmp_path, monkeypatch, capsys):
     fetch_fi.main()
     out = capsys.readouterr().out.splitlines()
     assert [ln for ln in out if "pages done" in ln] == ["0 pages done, fails 0", "500 pages done, fails 0"]
+
+
+def test_main_does_not_count_empty_or_already_downloaded_pages_as_failures(tmp_path, monkeypatch, capsys):
+    _fake_main_env(monkeypatch, tmp_path, total=300, results={2: 0, 3: 0})  # 0 rows = on disk already / empty page
+    assert fetch_fi.main() == 0
+    assert capsys.readouterr().out.splitlines()[-1] == "done, fails 0"
